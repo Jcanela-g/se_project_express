@@ -1,11 +1,16 @@
 const Item = require("../models/clothingItems");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  INTERNAL_SERVER_ERROR,
+} = require("../utils/errors");
 
 const getItems = (req, res) => {
   Item.find({})
     .then((items) => res.status(200).send({ data: items }))
     .catch((err) => {
       console.error(err);
-      res.status(500).send({ message: err.message });
+      res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
 };
 
@@ -18,9 +23,9 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
+        return res.status(BAD_REQUEST).send({ message: err.message });
       }
-      return res.status(500).send({ message: err.message });
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
 };
 
@@ -28,16 +33,16 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
   Item.findByIdAndDelete(itemId)
-    .orFail(new Error("NotFound"))
+    .orFail()
     .then(() => res.sendStatus(204))
     .catch((err) => {
       console.error(err);
       if (err.name === "NotFound") {
-        return res.status(404).send({ message: "Item not found" });
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
       } else if (err.name === "CastError") {
-        return res.status(400).send({ message: err.message });
+        return res.status(BAD_REQUEST).send({ message: "Item not found" });
       }
-      return res.status(500).send({ message: err.message });
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
 };
 
