@@ -33,17 +33,60 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
   Item.findByIdAndDelete(itemId)
-    .orFail()
-    .then(() => res.sendStatus(204))
+
+    .then((item) => {
+      if (!item) {
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
+      }
+      res.status(200).send({ data: item });
+    })
     .catch((err) => {
       console.error(err);
-      if (err.name === "NotFound") {
-        return res.status(NOT_FOUND).send({ message: "Item not found" });
-      } else if (err.name === "CastError") {
+      if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: "Item not found" });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
 };
 
-module.exports = { getItems, createItem, deleteItem };
+const likeItem = (req, res) => {
+  Item.findByIdAndUpdate(
+    req.params.itemId,
+    { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
+    { new: true }
+  )
+    .orFail(new Error("NotFound"))
+    .then((item) => res.status(200).send({ data: item }))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: "Item not found" });
+      }
+      if (err.message === "NotFound") {
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
+      }
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+    });
+};
+
+const dislikeItem = (req, res) => {
+  Item.findByIdAndUpdate(
+    req.params.itemId,
+    { $pull: { likes: req.user._id } }, // add _id to the array if it's not there yet
+    { new: true }
+  )
+    .orFail(new Error("NotFound"))
+    .then((item) => res.status(200).send({ data: item }))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: "Item not found" });
+      }
+      if (err.message === "NotFound") {
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
+      }
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+    });
+};
+
+module.exports = { getItems, createItem, deleteItem, likeItem, dislikeItem };
