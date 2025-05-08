@@ -3,6 +3,9 @@ const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
+  DEFAULT_SERVER_ERROR_MESSAGE,
+  BAD_REQUEST_MESSAGE,
+  NOT_FOUND_MESSAGE,
 } = require("../utils/errors");
 
 const getUsers = (req, res) => {
@@ -10,7 +13,9 @@ const getUsers = (req, res) => {
     .then((users) => res.status(200).send(users))
     .catch((err) => {
       console.error(err);
-      res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: DEFAULT_SERVER_ERROR_MESSAGE });
     });
 };
 
@@ -22,9 +27,11 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res.status(BAD_REQUEST).send({ message: BAD_REQUEST_MESSAGE });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: DEFAULT_SERVER_ERROR_MESSAGE });
     });
 };
 
@@ -37,13 +44,13 @@ const getUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: err.message });
+        return res.status(NOT_FOUND).send({ message: NOT_FOUND_MESSAGE });
       } else if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "User does not exisit" });
+        return res.status(BAD_REQUEST).send({ message: BAD_REQUEST_MESSAGE });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: DEFAULT_SERVER_ERROR_MESSAGE });
     });
 };
 

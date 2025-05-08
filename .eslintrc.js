@@ -1,6 +1,3 @@
-const _id = "";
-console.error("hey");
-
 module.exports = {
   env: {
     es2021: true,
