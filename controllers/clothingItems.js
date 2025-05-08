@@ -45,7 +45,7 @@ const deleteItem = (req, res) => {
       if (!item) {
         return res.status(NOT_FOUND).send({ message: NOT_FOUND_MESSAGE });
       }
-      res.status(200).send({ data: item });
+      return res.status(200).send({ data: item });
     })
     .catch((err) => {
       console.error(err);
