@@ -1,14 +1,18 @@
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../utils/config");
 const User = require("../models/user");
 const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   CONFLICT,
+  UNAUTHORIZED,
   DEFAULT_SERVER_ERROR_MESSAGE,
   BAD_REQUEST_MESSAGE,
   NOT_FOUND_MESSAGE,
   EMAIL_CONFLICT_MESSAGE,
+  UNAUTHORIZED_MESSAGE,
 } = require("../utils/errors");
 
 const getUsers = (req, res) => {
@@ -72,4 +76,19 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser };
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ token });
+    })
+    .catch((err) => {
+      res.status(UNAUTHORIZED).send({ message: UNAUTHORIZED_MESSAGE });
+    });
+};
+
+module.exports = { getUsers, createUser, getUser, login };
