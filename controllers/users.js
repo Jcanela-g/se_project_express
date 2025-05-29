@@ -1,11 +1,14 @@
+const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
+  CONFLICT,
   DEFAULT_SERVER_ERROR_MESSAGE,
   BAD_REQUEST_MESSAGE,
   NOT_FOUND_MESSAGE,
+  EMAIL_CONFLICT_MESSAGE,
 } = require("../utils/errors");
 
 const getUsers = (req, res) => {
@@ -20,14 +23,28 @@ const getUsers = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
+  const { name, avatar, email, password } = req.body;
 
-  User.create({ name, avatar })
-    .then((users) => res.status(201).send(users))
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => {
+      return User.create({ name, avatar, email, password: hash });
+    })
+    .then((user) =>
+      res.status(201).send({
+        _id: user._id,
+        name: user.name,
+        avatar: user.avatar,
+        email: user.email,
+      })
+    )
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: BAD_REQUEST_MESSAGE });
+      }
+      if (err.code === 11000) {
+        return res.status(CONFLICT).send({ message: EMAIL_CONFLICT_MESSAGE });
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
