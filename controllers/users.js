@@ -29,21 +29,31 @@ const getUsers = (req, res) => {
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  bcrypt
-    .hash(password, 10)
-    .then((hash) => {
-      return User.create({ name, avatar, email, password: hash });
+  User.findOne({ email })
+    .then((existingUser) => {
+      if (existingUser) {
+        const conflictError = new Error(EMAIL_CONFLICT_MESSAGE);
+        conflictError.status = CONFLICT;
+        throw conflictError;
+      }
+
+      return bcrypt.hash(password, 10).then((hash) => {
+        return User.create({ name, avatar, email, password: hash });
+      });
     })
-    .then((user) =>
+    .then((newUser) => {
       res.status(201).send({
-        _id: user._id,
-        name: user.name,
-        avatar: user.avatar,
-        email: user.email,
-      })
-    )
+        _id: newUser._id,
+        name: newUser.name,
+        avatar: newUser.avatar,
+        email: newUser.email,
+      });
+    })
     .catch((err) => {
       console.error(err);
+      if (err.status === CONFLICT) {
+        return res.status(CONFLICT).send({ message: err.message });
+      }
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: BAD_REQUEST_MESSAGE });
       }
@@ -79,6 +89,10 @@ const getCurrentUser = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res.status(BAD_REQUEST).send({ message: BAD_REQUEST_MESSAGE });
+  }
+
   User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -87,7 +101,8 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      res.status(UNAUTHORIZED).send({ message: UNAUTHORIZED_MESSAGE });
+      console.error(err);
+      return res.status(UNAUTHORIZED).send({ message: UNAUTHORIZED_MESSAGE });
     });
 };
 

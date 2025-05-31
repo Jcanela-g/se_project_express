@@ -52,9 +52,7 @@ const deleteItem = (req, res) => {
         return res.status(FORBIDDEN).send({ message: FORBIDDEN_MESSAGE });
       }
 
-      return Item.findByIdAndDelete(itemId).then((deletedItem) => {
-        return res.status(200).send({ data: deletedItem });
-      });
+      return Item.findByIdAndDelete(itemId).then((deletedItem) => res.status(200).send({ data: deletedItem }));
     })
     .catch((err) => {
       console.error(err);

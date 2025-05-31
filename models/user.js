@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -52,8 +53,10 @@ userSchema.statics.findUserByCredentials = function (email, password) {
           return Promise.reject(new Error("Invalid email or password"));
         }
 
-        delete user.password;
-        return user;
+        const userObj = user.toObject();
+
+        delete userObj.password;
+        return userObj;
       });
     });
 };
