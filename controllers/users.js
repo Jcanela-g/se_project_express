@@ -56,12 +56,12 @@ const createUser = (req, res) => {
     });
 };
 
-const getUser = (req, res) => {
-  const { userId } = req.params;
+const getCurrentUser = (req, res) => {
+  const userId = req.user._id;
 
   User.findById(userId)
     .orFail()
-    .then((users) => res.status(200).send(users))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
@@ -91,4 +91,38 @@ const login = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser, login };
+const updateCurrentUser = (req, res) => {
+  const { name, avatar } = req.body;
+  const userId = req.user._id;
+
+  User.findByIdAndUpdate(
+    userId,
+    { name, avatar },
+    { new: true, runValidators: true }
+  )
+    .orFail()
+    .then((user) => res.status(200).send(user))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res.status(BAD_REQUEST).send({ message: BAD_REQUEST_MESSAGE });
+      }
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND).send({ message: NOT_FOUND_MESSAGE });
+      }
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: BAD_REQUEST_MESSAGE });
+      }
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: DEFAULT_SERVER_ERROR_MESSAGE });
+    });
+};
+
+module.exports = {
+  getUsers,
+  createUser,
+  getCurrentUser,
+  login,
+  updateCurrentUser,
+};

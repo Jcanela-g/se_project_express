@@ -52,7 +52,7 @@ userSchema.statics.findUserByCredentials = function (email, password) {
           return Promise.reject(new Error("Invalid email or password"));
         }
 
-        user.password = undefined;
+        delete user.password;
         return user;
       });
     });
