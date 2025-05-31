@@ -3,9 +3,11 @@ const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
+  FORBIDDEN,
   DEFAULT_SERVER_ERROR_MESSAGE,
   BAD_REQUEST_MESSAGE,
   NOT_FOUND_MESSAGE,
+  FORBIDDEN_MESSAGE,
 } = require("../utils/errors");
 
 const getItems = (req, res) => {
@@ -38,14 +40,21 @@ const createItem = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
+  const currentUserId = req.user._id;
 
-  Item.findByIdAndDelete(itemId)
-
+  Item.findById(itemId)
     .then((item) => {
       if (!item) {
         return res.status(NOT_FOUND).send({ message: NOT_FOUND_MESSAGE });
       }
-      return res.status(200).send({ data: item });
+
+      if (item.owner.toString() !== currentUserId) {
+        return res.status(FORBIDDEN).send({ message: FORBIDDEN_MESSAGE });
+      }
+
+      return Item.findByIdAndDelete(itemId).then((deletedItem) => {
+        return res.status(200).send({ data: deletedItem });
+      });
     })
     .catch((err) => {
       console.error(err);
