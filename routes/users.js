@@ -11,6 +11,6 @@ router.post("/signin", login);
 router.post("/signup", createUser);
 router.use(auth);
 router.get("/users/me", getCurrentUser);
-router.proppatch("/users/me", updateCurrentUser);
+router.patch("/users/me", updateCurrentUser);
 
 module.exports = router;

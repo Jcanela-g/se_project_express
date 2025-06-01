@@ -29,7 +29,7 @@ const getUsers = (req, res) => {
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  if (!email /* or !name, !avatar, !password if you want */) {
+  if (!email) {
     return res.status(BAD_REQUEST).send({ message: BAD_REQUEST_MESSAGE });
   }
 
@@ -41,9 +41,9 @@ const createUser = (req, res) => {
         throw conflictError;
       }
 
-      return bcrypt.hash(password, 10).then((hash) => {
-        return User.create({ name, avatar, email, password: hash });
-      });
+      return bcrypt
+        .hash(password, 10)
+        .then((hash) => User.create({ name, avatar, email, password: hash }));
     })
     .then((newUser) => {
       res.status(201).send({
