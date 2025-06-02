@@ -20,7 +20,7 @@ const getUsers = (req, res) => {
     .then((users) => res.status(200).send(users))
     .catch((err) => {
       console.error(err);
-      res
+      return res
         .status(INTERNAL_SERVER_ERROR)
         .send({ message: DEFAULT_SERVER_ERROR_MESSAGE });
     });
@@ -33,26 +33,25 @@ const createUser = (req, res) => {
     return res.status(BAD_REQUEST).send({ message: BAD_REQUEST_MESSAGE });
   }
 
-  User.findOne({ email })
+  return User.findOne({ email })
     .then((existingUser) => {
       if (existingUser) {
         const conflictError = new Error(EMAIL_CONFLICT_MESSAGE);
         conflictError.status = CONFLICT;
-        throw conflictError;
+        return Promise.reject(conflictError);
       }
-
       return bcrypt
         .hash(password, 10)
         .then((hash) => User.create({ name, avatar, email, password: hash }));
     })
-    .then((newUser) => {
+    .then((newUser) =>
       res.status(201).send({
         _id: newUser._id,
         name: newUser.name,
         avatar: newUser.avatar,
         email: newUser.email,
-      });
-    })
+      })
+    )
     .catch((err) => {
       console.error(err);
       if (err.status === CONFLICT) {
@@ -97,12 +96,12 @@ const login = (req, res) => {
     return res.status(BAD_REQUEST).send({ message: BAD_REQUEST_MESSAGE });
   }
 
-  User.findUserByCredentials(email, password)
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.send({ token });
+      return res.send({ token });
     })
     .catch((err) => {
       console.error(err);
