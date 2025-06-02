@@ -15,17 +15,6 @@ const {
   UNAUTHORIZED_MESSAGE,
 } = require("../utils/errors");
 
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: DEFAULT_SERVER_ERROR_MESSAGE });
-    });
-};
-
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
@@ -105,7 +94,13 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res.status(UNAUTHORIZED).send({ message: UNAUTHORIZED_MESSAGE });
+      if (err.message === "Invalid email or password") {
+        return res.status(UNAUTHORIZED).send({ message: UNAUTHORIZED_MESSAGE });
+      }
+
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: DEFAULT_SERVER_ERROR_MESSAGE });
     });
 };
 
@@ -138,7 +133,6 @@ const updateCurrentUser = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
   createUser,
   getCurrentUser,
   login,
