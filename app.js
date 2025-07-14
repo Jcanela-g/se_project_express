@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const { errors: celebrateErrors } = require("celebrate");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 const mainRouter = require("./routes/index");
 const errorHandler = require("./middlewares/error-handler");
 
@@ -18,7 +19,9 @@ mongoose
 app.use(cors());
 
 app.use(express.json());
+app.use(requestLogger);
 app.use("/", mainRouter);
+app.use(errorLogger);
 app.use(celebrateErrors());
 app.use(errorHandler);
 
