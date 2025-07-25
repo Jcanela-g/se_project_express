@@ -1,4 +1,4 @@
-const { JWT_SECRET = "dev‐fallback‐secret" } = process.env;
+const { JWT_SECRET = "super-strong-secret" } = process.env;
 
 if (!process.env.JWT_SECRET) {
   console.warn(
