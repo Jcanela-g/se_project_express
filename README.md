@@ -12,3 +12,5 @@ The technologies used for this project:
 ### Testing the server
 
 In order to test the server i utilized Postman and MongoDB Compass. These tools were crucial for testing the server.
+
+Check out the site! - [Live Site](https://wtwrnow.jumpingcrab.com)
