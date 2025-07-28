@@ -44,7 +44,7 @@ const createUser = (req, res, next) => {
       if (err.code === 11000) {
         return next(new ConflictError(EMAIL_CONFLICT_MESSAGE));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -61,7 +61,7 @@ const getCurrentUser = (req, res, next) => {
       if (err.name === "CastError") {
         return next(new BadRequestError(BAD_REQUEST_MESSAGE));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -83,7 +83,7 @@ const login = (req, res, next) => {
       if (err.message === "Invalid email or password") {
         return next(new UnauthorizedError(UNAUTHORIZED_MESSAGE));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -105,7 +105,7 @@ const updateCurrentUser = (req, res, next) => {
       if (err.name === "DocumentNotFoundError") {
         return next(new NotFoundError(NOT_FOUND_MESSAGE));
       }
-      next(err);
+      return next(err);
     });
 };
 

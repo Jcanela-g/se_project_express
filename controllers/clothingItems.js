@@ -24,7 +24,7 @@ const createItem = (req, res, next) => {
       if (err.name === "ValidationError") {
         return next(new BadRequestError(BAD_REQUEST_MESSAGE));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -50,7 +50,7 @@ const deleteItem = (req, res, next) => {
       if (err.name === "CastError") {
         return next(new BadRequestError(BAD_REQUEST_MESSAGE));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -66,7 +66,7 @@ const likeItem = (req, res, next) => {
       if (err.name === "CastError") {
         return next(new BadRequestError(BAD_REQUEST_MESSAGE));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -82,7 +82,7 @@ const dislikeItem = (req, res, next) => {
       if (err.name === "CastError") {
         return next(new BadRequestError(BAD_REQUEST_MESSAGE));
       }
-      next(err);
+      return next(err);
     });
 };
 

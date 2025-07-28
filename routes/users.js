@@ -3,6 +3,7 @@ const auth = require("../middlewares/auth");
 const {
   validateUserBody,
   validateLogin,
+  validateUpdateUser,
 } = require("../middlewares/validation");
 const {
   createUser,
@@ -15,6 +16,6 @@ router.post("/signin", validateLogin, login);
 router.post("/signup", validateUserBody, createUser);
 router.use(auth);
 router.get("/users/me", getCurrentUser);
-router.patch("/users/me", validateUserBody, updateCurrentUser);
+router.patch("/users/me", validateUpdateUser, updateCurrentUser);
 
 module.exports = router;
